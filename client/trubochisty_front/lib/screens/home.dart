@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import '../widgets/PipeCard.dart';
+import 'culvert_management_screen.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: PipeCard()),
-    );
+    return const CulvertManagementScreen();
   }
 }
