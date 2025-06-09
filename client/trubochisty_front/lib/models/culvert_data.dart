@@ -116,6 +116,53 @@ class CulvertData {
     return 'Новая труба';
   }
   
+  // CopyWith method for efficient updates
+  CulvertData copyWith({
+    String? address,
+    String? coordinates,
+    String? road,
+    String? serialNumber,
+    String? pipeType,
+    String? material,
+    String? diameter,
+    String? length,
+    String? headType,
+    String? foundationType,
+    String? workType,
+    String? constructionYear,
+    DateTime? lastRepairDate,
+    DateTime? lastInspectionDate,
+    double? strengthRating,
+    double? safetyRating,
+    double? maintainabilityRating,
+    double? generalConditionRating,
+    List<String>? defects,
+    List<String>? photos,
+  }) {
+    return CulvertData(
+      address: address ?? this.address,
+      coordinates: coordinates ?? this.coordinates,
+      road: road ?? this.road,
+      serialNumber: serialNumber ?? this.serialNumber,
+      pipeType: pipeType ?? this.pipeType,
+      material: material ?? this.material,
+      diameter: diameter ?? this.diameter,
+      length: length ?? this.length,
+      headType: headType ?? this.headType,
+      foundationType: foundationType ?? this.foundationType,
+      workType: workType ?? this.workType,
+      constructionYear: constructionYear ?? this.constructionYear,
+      lastRepairDate: lastRepairDate ?? this.lastRepairDate,
+      lastInspectionDate: lastInspectionDate ?? this.lastInspectionDate,
+      strengthRating: strengthRating ?? this.strengthRating,
+      safetyRating: safetyRating ?? this.safetyRating,
+      maintainabilityRating: maintainabilityRating ?? this.maintainabilityRating,
+      generalConditionRating: generalConditionRating ?? this.generalConditionRating,
+      defects: defects ?? this.defects,
+      photos: photos ?? this.photos,
+    );
+  }
+  
   // Helper method for search matching
   bool matches(String searchQuery) {
     final query = searchQuery.toLowerCase();
@@ -125,5 +172,54 @@ class CulvertData {
            coordinates.toLowerCase().contains(query) ||
            material.toLowerCase().contains(query) ||
            pipeType.toLowerCase().contains(query);
+  }
+
+  // Equality operator for efficient comparisons
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! CulvertData) return false;
+    return address == other.address &&
+           coordinates == other.coordinates &&
+           road == other.road &&
+           serialNumber == other.serialNumber &&
+           pipeType == other.pipeType &&
+           material == other.material &&
+           diameter == other.diameter &&
+           length == other.length &&
+           headType == other.headType &&
+           foundationType == other.foundationType &&
+           workType == other.workType &&
+           constructionYear == other.constructionYear &&
+           lastRepairDate == other.lastRepairDate &&
+           lastInspectionDate == other.lastInspectionDate &&
+           strengthRating == other.strengthRating &&
+           safetyRating == other.safetyRating &&
+           maintainabilityRating == other.maintainabilityRating &&
+           generalConditionRating == other.generalConditionRating;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      address,
+      coordinates,
+      road,
+      serialNumber,
+      pipeType,
+      material,
+      diameter,
+      length,
+      headType,
+      foundationType,
+      workType,
+      constructionYear,
+      lastRepairDate,
+      lastInspectionDate,
+      strengthRating,
+      safetyRating,
+      maintainabilityRating,
+      generalConditionRating,
+    );
   }
 } 

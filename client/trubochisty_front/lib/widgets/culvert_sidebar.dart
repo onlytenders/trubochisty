@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/culvert_data.dart';
 import '../providers/culvert_provider.dart';
+import 'user_profile_header.dart';
 
 class CulvertSidebar extends StatefulWidget {
   final bool isMobile;
@@ -68,6 +69,7 @@ class _CulvertSidebarState extends State<CulvertSidebar>
         ),
         child: Column(
           children: [
+            const UserProfileHeader(),
             _buildHeader(colorScheme),
             _buildSearchBar(colorScheme),
             Expanded(
@@ -142,7 +144,7 @@ class _CulvertSidebarState extends State<CulvertSidebar>
             builder: (context, provider, _) {
               return IconButton(
                 onPressed: () {
-                  provider.createNewCulvert();
+                  provider.createNewCulvertWithSave();
                   if (widget.isMobile) {
                     widget.onClose?.call();
                   }

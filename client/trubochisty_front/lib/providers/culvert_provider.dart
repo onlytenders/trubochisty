@@ -122,9 +122,23 @@ class CulvertProvider extends ChangeNotifier {
   }
   
   void createNewCulvert() {
-    final newCulvert = CulvertData();
+    // Create a unique new culvert with a temporary unique identifier
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final newCulvert = CulvertData(
+      serialNumber: 'NEW_${timestamp}',
+      address: '',
+      coordinates: '',
+      road: '',
+    );
     _culverts.insert(0, newCulvert);
     _selectedCulvert = newCulvert;
     notifyListeners();
+  }
+  
+  // Method to save current culvert before creating new one
+  void createNewCulvertWithSave() {
+    // Always save current state before creating new
+    // The form will handle the actual saving logic
+    createNewCulvert();
   }
 } 
