@@ -168,19 +168,17 @@ class _PipeFormCardState extends State<PipeFormCard> with TickerProviderStateMix
                   ),
                   child: Column(
                     children: [
-                      // Header
-                      Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: PipeHeader(),
-                      ),
-                      
-                      // Scrollable Content
+                      // Scrollable Content (now includes header)
                       Expanded(
                         child: SingleChildScrollView(
-                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                          padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // Header (now scrolls with content)
+                              PipeHeader(),
+                              const SizedBox(height: 24),
+                              
                               IdentificationSection(
                                 data: _culvertData,
                                 onDataChanged: _updateData,

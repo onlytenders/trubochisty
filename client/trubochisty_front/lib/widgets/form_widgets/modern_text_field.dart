@@ -5,7 +5,9 @@ class ModernTextField extends StatelessWidget {
   final TextEditingController controller;
   final IconData icon;
   final String? suffix;
+  final Widget? suffixWidget;
   final TextInputType? keyboardType;
+  final VoidCallback? onSuffixPressed;
 
   const ModernTextField({
     super.key,
@@ -13,7 +15,9 @@ class ModernTextField extends StatelessWidget {
     required this.controller,
     required this.icon,
     this.suffix,
+    this.suffixWidget,
     this.keyboardType,
+    this.onSuffixPressed,
   });
 
   @override
@@ -28,7 +32,8 @@ class ModernTextField extends StatelessWidget {
         style: TextStyle(color: colorScheme.onSurface),
         decoration: InputDecoration(
           labelText: label,
-          suffixText: suffix,
+          suffixText: suffixWidget == null ? suffix : null,
+          suffixIcon: suffixWidget,
           prefixIcon: Icon(icon, color: colorScheme.primary.withOpacity(0.7)),
           filled: true,
           fillColor: colorScheme.surface.withOpacity(0.8),
