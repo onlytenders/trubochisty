@@ -1,4 +1,23 @@
 services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: trubo-postgres
+    environment:
+      POSTGRES_DB: trubochisty
+      POSTGRES_USER: trubo_user
+      POSTGRES_PASSWORD: trubo_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trubo_user -d trubochisty"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot Backend
   backend:
     build: 
       context: ./server/truboserver
@@ -7,7 +26,18 @@ services:
         - amazoncorretto:21-alpine-jdk
     ports:
       - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=trubochisty
+      - DB_USER=trubo_user
+      - DB_PASSWORD=trubo_pass
 
+  # Flutter Web Frontend
   frontend:
     build: 
       context: ./client/trubochisty_front
@@ -15,4 +45,9 @@ services:
         - dart:stable
         - nginx:alpine
     ports:
-      - "3000:80" 
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data: 

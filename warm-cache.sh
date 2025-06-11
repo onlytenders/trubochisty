@@ -10,6 +10,7 @@ docker pull maven:latest &
 docker pull amazoncorretto:21-alpine-jdk &
 docker pull dart:stable &
 docker pull nginx:alpine &
+docker pull postgres:15-alpine &
 wait
 
 echo "✅ Cache warmed! Now builds will be lightning fast!"

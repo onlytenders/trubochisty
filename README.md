@@ -5,7 +5,7 @@ Quick setup guide for the team to get the full-stack app running with Docker.
 ## Stack
 - **Backend**: Spring Boot (Java 21) with Amazon Corretto
 - **Frontend**: Flutter Web with nginx
-- **Database**: None currently
+- **Database**: PostgreSQL 15 Alpine
 
 ## Prerequisites
 - Docker
@@ -38,7 +38,7 @@ docker-compose up
 ## Available Scripts
 
 ### `./warm-cache.sh`
-- Downloads all base Docker images in parallel
+- Downloads all base Docker images in parallel (including PostgreSQL)
 - Run this first time or when Docker cache gets cleared
 - Makes subsequent builds much faster
 
@@ -56,11 +56,20 @@ docker-compose up
 - **Frontend**: http://localhost:3000
 - **Backend**: http://localhost:8080
 - **Health Check**: http://localhost:8080/actuator/health
+- **Database**: localhost:5432 (from host machine)
+
+## Database Access
+- **Host**: postgres (from backend) / localhost (from host machine)
+- **Port**: 5432
+- **Database**: trubochisty
+- **Username**: trubo_user
+- **Password**: trubo_pass
 
 ## Build Optimization
 - Maven dependencies cached with BuildKit cache mounts
 - Only rebuilds when pom.xml or pubspec.yaml change
 - Code changes trigger fast rebuilds (~30-60 seconds)
+- PostgreSQL data persisted in Docker volume
 
 ## Common Issues
 
@@ -76,8 +85,14 @@ docker-compose up
 - BuildKit cache mounts should prevent this
 - Make sure `DOCKER_BUILDKIT=1` is set (scripts do this automatically)
 
+**Database connection issues?**
+- Make sure PostgreSQL container is healthy: `docker-compose ps`
+- Check logs: `docker-compose logs postgres`
+- Backend waits for database to be ready before starting
+
 ## Development Tips
 - Change code → run `./build.sh` → `docker-compose up`
 - For frontend changes, only frontend container rebuilds
 - For backend changes, only backend container rebuilds
 - Dependencies only redownload when pom.xml/pubspec.yaml change
+- Database schema auto-updates with Hibernate DDL
