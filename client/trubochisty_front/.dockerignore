@@ -1,0 +1,17 @@
+.dart_tool/
+.packages
+build/
+.git
+.gitignore
+README.md
+.env
+.DS_Store
+*.iml
+.idea/
+.vscode/
+android/
+ios/
+linux/
+macos/
+windows/
+test/ 
