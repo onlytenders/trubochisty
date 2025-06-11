@@ -123,26 +123,4 @@ public class Culvert {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
-    // Custom utility methods for managing collections
-    public void addDefect(String defect) {
-        if (this.defects == null) this.defects = new ArrayList<>();
-        this.defects.add(defect);
-    }
-
-    public void addPhoto(String photoUrl) {
-        if (this.photos == null) this.photos = new ArrayList<>();
-        this.photos.add(photoUrl);
-    }
-
-    @Override
-    public String toString() {
-        return "Culvert{" +
-                "id=" + id +
-                ", serialNumber='" + serialNumber + '\'' +
-                ", address='" + address + '\'' +
-                ", road='" + road + '\'' +
-                ", material='" + material + '\'' +
-                '}';
-    }
 }
