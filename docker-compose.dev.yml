@@ -1,0 +1,38 @@
+services:
+  # Spring Boot Backend with hot reload
+  backend:
+    build:
+      context: ./server/truboserver
+      dockerfile: Dockerfile
+      cache_from:
+        - trubo-backend:latest
+    container_name: trubo-backend-dev
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+    volumes:
+      # Mount source for live reload (optional)
+      - ./server/truboserver/src:/app/src:ro
+    networks:
+      - trubo-network
+
+  # Flutter Web Frontend
+  frontend:
+    build:
+      context: ./client/trubochisty_front
+      dockerfile: Dockerfile
+      cache_from:
+        - trubo-frontend:latest
+    container_name: trubo-frontend-dev
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - trubo-network
+
+networks:
+  trubo-network:
+    driver: bridge 

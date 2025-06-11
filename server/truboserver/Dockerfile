@@ -1,28 +1,24 @@
-# Use OpenJDK 22 as base image
-FROM openjdk:22-jdk-slim
+# Build stage
+FROM maven:latest AS build
+WORKDIR /build
 
-# Set working directory
-WORKDIR /app
-
-# Copy Maven wrapper and pom.xml first (for better layer caching)
-COPY mvnw .
-COPY .mvn .mvn
+# Copy pom.xml first for dependency caching
 COPY pom.xml .
 
-# Make mvnw executable
-RUN chmod +x ./mvnw
+# Use BuildKit cache mount for Maven repository (this is the magic!)
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn dependency:go-offline -B
 
-# Download dependencies (this layer will be cached if pom.xml doesn't change)
-RUN ./mvnw dependency:go-offline -B
-
-# Copy source code
+# Copy source and build
 COPY src ./src
 
-# Build the application
-RUN ./mvnw clean package -DskipTests
+# Build using cached dependencies
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn clean package -DskipTests
 
-# Expose port 8080
+# Runtime stage
+FROM amazoncorretto:21-alpine-jdk
+WORKDIR /app
+COPY --from=build /build/target/*.jar app.jar
 EXPOSE 8080
-
-# Run the application
-CMD ["java", "-jar", "target/truboserver-0.0.1-SNAPSHOT.jar"] 
+CMD ["java", "-jar", "app.jar"]

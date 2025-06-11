@@ -1,0 +1,26 @@
+# Git files
+.git
+.gitignore
+
+# Documentation
+*.md
+README*
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment files
+.env*
+
+# Docker files (no need to include in context)
+Dockerfile*
+docker-compose* 

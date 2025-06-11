@@ -1,6 +1,5 @@
-.dart_tool/
-.packages
 build/
+.dart_tool/
 .git
 .gitignore
 README.md
@@ -14,4 +13,6 @@ ios/
 linux/
 macos/
 windows/
-test/ 
+test/
+Dockerfile
+.dockerignore 

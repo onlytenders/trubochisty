@@ -1,33 +1,27 @@
-# Use Flutter image for building
-FROM cirrusci/flutter:stable AS build
-
-# Set working directory
+# Build stage - using dart image for more stability
+FROM dart:stable AS build
 WORKDIR /app
 
-# Copy pubspec files
-COPY pubspec.* ./
+# Install Flutter manually for better control
+RUN git clone https://github.com/flutter/flutter.git -b stable --depth 1 /flutter
+ENV PATH="/flutter/bin:${PATH}"
 
-# Get dependencies
+# Configure Flutter
+RUN flutter doctor -v
+RUN flutter config --enable-web --no-analytics
+
+# Copy pubspec files first for dependency caching
+COPY pubspec.yaml pubspec.lock ./
 RUN flutter pub get
 
-# Copy source code
-COPY . .
-
-# Enable web and build for web
-RUN flutter config --enable-web
+# Copy source and build
+COPY lib ./lib
+COPY web ./web
+COPY analysis_options.yaml ./
 RUN flutter build web --release
 
-# Use nginx to serve the web app
+# Runtime stage
 FROM nginx:alpine
-
-# Copy built web files to nginx
 COPY --from=build /app/build/web /usr/share/nginx/html
-
-# Copy custom nginx config (we'll create this)
-COPY nginx.conf /etc/nginx/nginx.conf
-
-# Expose port 80
 EXPOSE 80
-
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"] 
+CMD ["nginx", "-g", "daemon off;"]

@@ -1,10 +1,10 @@
 target/
-.mvn/wrapper/maven-wrapper.jar
 .git
 .gitignore
 README.md
-.env
 .DS_Store
 *.iml
 .idea/
-.vscode/ 
+.vscode/
+Dockerfile
+.dockerignore 
