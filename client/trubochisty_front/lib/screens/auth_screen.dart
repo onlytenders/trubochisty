@@ -139,7 +139,7 @@ class _AuthScreenState extends State<AuthScreen>
             _buildToggleAuthMode(),
             if (!_isSignUp) ...[
               const SizedBox(height: 16),
-              _buildDemoCredentials(),
+              _buildDemoInfo(),
             ],
           ],
         ),
@@ -199,9 +199,9 @@ class _AuthScreenState extends State<AuthScreen>
               _buildEmailField(),
               const SizedBox(height: 16),
               _buildPasswordField(),
-              if (authProvider.errorMessage != null) ...[
+              if (authProvider.error != null) ...[
                 const SizedBox(height: 16),
-                _buildErrorMessage(authProvider.errorMessage!),
+                _buildErrorMessage(authProvider.error!),
               ],
             ],
           ),
@@ -354,7 +354,7 @@ class _AuthScreenState extends State<AuthScreen>
         return SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: authProvider.isLoading ? null : _handleSubmit,
+            onPressed: authProvider.isLoading ? null : _submitForm,
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -415,109 +415,47 @@ class _AuthScreenState extends State<AuthScreen>
     );
   }
 
-  Widget _buildDemoCredentials() {
+  Widget _buildDemoInfo() {
     final colorScheme = Theme.of(context).colorScheme;
     
-    return Column(
-      children: [
-        TextButton.icon(
-          onPressed: () {
-            setState(() {
-              _showDemoCredentials = !_showDemoCredentials;
-            });
-          },
-          icon: Icon(
-            _showDemoCredentials 
-                ? Icons.keyboard_arrow_up_rounded 
-                : Icons.keyboard_arrow_down_rounded,
-            color: colorScheme.primary,
-          ),
-          label: Text(
-            'Демо-аккаунты',
-            style: TextStyle(
-              color: colorScheme.primary,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceVariant.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        'Создайте аккаунт или войдите с существующими учетными данными',
+        style: TextStyle(
+          fontSize: 12,
+          color: colorScheme.onSurface.withOpacity(0.7),
         ),
-        if (_showDemoCredentials) ...[
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceVariant.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Consumer<AuthProvider>(
-              builder: (context, authProvider, _) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: authProvider.demoCredentials.map((cred) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              '${cred['name']} (${cred['role']})',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              _emailController.text = cred['email']!;
-                              _passwordController.text = cred['password']!;
-                            },
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8, 
-                                vertical: 4,
-                              ),
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            child: const Text(
-                              'Использовать',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                );
-              },
-            ),
-          ),
-        ],
-      ],
+        textAlign: TextAlign.center,
+      ),
     );
   }
 
-  Future<void> _handleSubmit() async {
+  Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
 
     final authProvider = context.read<AuthProvider>();
+    
     bool success;
-
     if (_isSignUp) {
-      success = await authProvider.signUp(
+      success = await authProvider.register(
         _nameController.text.trim(),
         _emailController.text.trim(),
         _passwordController.text,
       );
     } else {
-      success = await authProvider.signIn(
+      success = await authProvider.login(
         _emailController.text.trim(),
         _passwordController.text,
       );
     }
 
     if (success && mounted) {
-      // Navigation will be handled by the main app based on auth state
+      // Navigation will be handled by AuthWrapper
     }
   }
 } 

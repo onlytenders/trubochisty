@@ -47,14 +47,12 @@ class AuthWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, _) {
-        switch (authProvider.status) {
-          case AuthStatus.initial:
-          case AuthStatus.loading:
-            return const LoadingScreen();
-          case AuthStatus.authenticated:
-            return const MainAppWithShortcuts();
-          case AuthStatus.unauthenticated:
-            return const AuthScreen();
+        if (authProvider.isLoading) {
+          return const LoadingScreen();
+        } else if (authProvider.isAuthenticated) {
+          return const MainAppWithShortcuts();
+        } else {
+          return const AuthScreen();
         }
       },
     );
@@ -75,6 +73,11 @@ class _MainAppWithShortcutsState extends State<MainAppWithShortcuts> {
   void initState() {
     super.initState();
     _focusNode = FocusNode();
+    
+    // Load culverts when the app starts
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CulvertProvider>().loadCulverts();
+    });
   }
 
   @override
@@ -137,7 +140,7 @@ class CreateNewCulvertAction extends Action<CreateNewCulvertIntent> {
   Object? invoke(CreateNewCulvertIntent intent) {
     final context = primaryFocus?.context;
     if (context != null) {
-      context.read<CulvertProvider>().createNewCulvertWithSave();
+      // TODO: Implement create new culvert functionality
     }
     return null;
   }
@@ -189,7 +192,7 @@ class LogoutAction extends Action<LogoutIntent> {
   Object? invoke(LogoutIntent intent) {
     final context = primaryFocus?.context;
     if (context != null) {
-      context.read<AuthProvider>().signOut();
+      context.read<AuthProvider>().logout();
     }
     return null;
   }
