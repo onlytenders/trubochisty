@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS culverts (
+    id VARCHAR(255) PRIMARY KEY,
+    address VARCHAR(255) NOT NULL,
+    coordinates VARCHAR(255) NOT NULL,
+    road VARCHAR(255) NOT NULL,
+    serial_number VARCHAR(255) NOT NULL UNIQUE,
+    pipe_type VARCHAR(255) NOT NULL,
+    material VARCHAR(255) NOT NULL,
+    diameter DOUBLE NOT NULL,
+    length DOUBLE NOT NULL,
+    head_type VARCHAR(255) NOT NULL,
+    foundation_type VARCHAR(255) NOT NULL,
+    work_type VARCHAR(255) NOT NULL,
+    construction_year INTEGER NOT NULL,
+    last_repair_date TIMESTAMP,
+    last_inspection_date TIMESTAMP,
+    strength_rating DOUBLE NOT NULL,
+    safety_rating DOUBLE NOT NULL,
+    maintainability_rating DOUBLE NOT NULL,
+    general_condition_rating DOUBLE NOT NULL,
+    defects TEXT,
+    photos TEXT
+); 

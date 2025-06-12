@@ -1,0 +1,655 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+		"name": "TruboСhisty API Collection",
+		"description": "Complete API collection for testing TruboСhisty backend with JWT authentication and culvert management",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('auth_token', response.token);",
+									"    pm.environment.set('user_id', response.user.id);",
+									"    pm.environment.set('username', response.user.username);",
+									"    console.log('✅ User registered successfully');",
+									"    console.log('Token saved:', response.token.substring(0, 20) + '...');",
+									"} else {",
+									"    console.log('❌ Registration failed');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"testuser@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('auth_token', response.token);",
+									"    pm.environment.set('user_id', response.user.id);",
+									"    pm.environment.set('username', response.user.username);",
+									"    console.log('✅ Login successful');",
+									"    console.log('Token saved:', response.token.substring(0, 20) + '...');",
+									"} else {",
+									"    console.log('❌ Login failed');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register Admin User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('admin_token', response.token);",
+									"    pm.environment.set('admin_user_id', response.user.id);",
+									"    console.log('✅ Admin user registered successfully');",
+									"    console.log('Admin token saved:', response.token.substring(0, 20) + '...');",
+									"} else {",
+									"    console.log('❌ Admin registration failed');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"email\": \"admin@trubochisty.com\",\n    \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Culverts",
+			"item": [
+				{
+					"name": "Get All Culverts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is an array', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"});",
+									"",
+									"if (pm.response.json().length > 0) {",
+									"    const firstCulvert = pm.response.json()[0];",
+									"    pm.environment.set('culvert_id', firstCulvert.id);",
+									"    console.log('✅ Found', pm.response.json().length, 'culverts');",
+									"    console.log('First culvert ID saved:', firstCulvert.id);",
+									"} else {",
+									"    console.log('ℹ️ No culverts found');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/culverts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"culverts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Culvert (Admin Required)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('new_culvert_id', response.id);",
+									"    console.log('✅ Culvert created successfully');",
+									"    console.log('New culvert ID:', response.id);",
+									"} else {",
+									"    console.log('❌ Culvert creation failed');",
+									"    console.log('Response:', pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"address\": \"Тестовый адрес 123\",\n    \"coordinates\": \"55.7558,37.6173\",\n    \"road\": \"Тестовая дорога\",\n    \"serialNumber\": \"TEST-001\",\n    \"pipeType\": \"Круглая\",\n    \"material\": \"Бетон\",\n    \"diameter\": \"1.5\",\n    \"length\": \"12.0\",\n    \"headType\": \"Стандартная\",\n    \"foundationType\": \"Бетонный\",\n    \"workType\": \"Новое строительство\",\n    \"constructionYear\": \"2023\",\n    \"strengthRating\": 4.5,\n    \"safetyRating\": 4.0,\n    \"maintainabilityRating\": 4.2,\n    \"generalConditionRating\": 4.3,\n    \"defects\": [\"Небольшие трещины\"],\n    \"photos\": [\"photo1.jpg\", \"photo2.jpg\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/culverts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"culverts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Culvert By ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has culvert data', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('id');",
+									"    pm.expect(response).to.have.property('address');",
+									"    pm.expect(response).to.have.property('serialNumber');",
+									"});",
+									"",
+									"console.log('✅ Culvert retrieved by ID successfully');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/culverts/{{new_culvert_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"culverts",
+								"{{new_culvert_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Culvert (Admin Required)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    console.log('✅ Culvert updated successfully');",
+									"    console.log('Updated address:', response.address);",
+									"} else {",
+									"    console.log('❌ Culvert update failed');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"address\": \"Обновленный тестовый адрес 123\",\n    \"coordinates\": \"55.7558,37.6173\",\n    \"road\": \"Обновленная тестовая дорога\",\n    \"serialNumber\": \"TEST-001-UPDATED\",\n    \"pipeType\": \"Прямоугольная\",\n    \"material\": \"Сталь\",\n    \"diameter\": \"2.0\",\n    \"length\": \"15.0\",\n    \"headType\": \"Специальная\",\n    \"foundationType\": \"Стальной\",\n    \"workType\": \"Реконструкция\",\n    \"constructionYear\": \"2024\",\n    \"strengthRating\": 4.8,\n    \"safetyRating\": 4.5,\n    \"maintainabilityRating\": 4.7,\n    \"generalConditionRating\": 4.6,\n    \"defects\": [\"Исправлены трещины\"],\n    \"photos\": [\"updated_photo1.jpg\", \"updated_photo2.jpg\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/culverts/{{new_culvert_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"culverts",
+								"{{new_culvert_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Culverts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is an array', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"});",
+									"",
+									"console.log('✅ Search completed, found', pm.response.json().length, 'results');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/culverts/search?query=тест",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"culverts",
+								"search"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "тест"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Culvert (Admin Required)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 204', function () {",
+									"    pm.response.to.have.status(204);",
+									"});",
+									"",
+									"console.log('✅ Culvert deleted successfully');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/culverts/{{new_culvert_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"culverts",
+								"{{new_culvert_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Error Testing",
+			"item": [
+				{
+					"name": "Invalid Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 401 or 400', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 401]);",
+									"});",
+									"",
+									"console.log('✅ Invalid login properly rejected');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"wronguser\",\n    \"password\": \"wrongpassword\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Culvert Without Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 401', function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"console.log('✅ Unauthorized request properly rejected');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"address\": \"Unauthorized Test\",\n    \"coordinates\": \"55.7558,37.6173\",\n    \"road\": \"Test Road\",\n    \"serialNumber\": \"UNAUTH-001\",\n    \"pipeType\": \"Round\",\n    \"material\": \"Concrete\",\n    \"diameter\": \"1.5\",\n    \"length\": \"12.0\",\n    \"headType\": \"Standard\",\n    \"foundationType\": \"Concrete\",\n    \"workType\": \"New Construction\",\n    \"constructionYear\": \"2023\",\n    \"strengthRating\": 4.5,\n    \"safetyRating\": 4.0,\n    \"maintainabilityRating\": 4.2,\n    \"generalConditionRating\": 4.3\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/culverts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"culverts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Culvert Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 400', function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"console.log('✅ Invalid data properly rejected');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"address\": \"\",\n    \"coordinates\": \"\",\n    \"road\": \"\",\n    \"serialNumber\": \"\",\n    \"pipeType\": \"\",\n    \"material\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/culverts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"culverts"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"console.log('🚀 Starting API request to:', pm.request.url.toString());"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"console.log('📊 Response status:', pm.response.code, pm.response.status);",
+					"console.log('⏱️ Response time:', pm.response.responseTime + 'ms');",
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "auth_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "admin_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "admin_user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "username",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "culvert_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "new_culvert_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+} 
