@@ -5,6 +5,6 @@ import com.trubochisty.truboserver.model.Culvert;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface culvertRepository extends JpaRepository<Culvert, Long> {
+public interface IculvertRepository extends JpaRepository<Culvert, Long> {
     
 }

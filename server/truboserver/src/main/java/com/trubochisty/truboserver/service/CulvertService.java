@@ -1,5 +1,5 @@
 package com.trubochisty.truboserver.service;
 
-public class userService {
+public class CulvertService {
     
 }

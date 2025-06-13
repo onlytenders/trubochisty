@@ -1,21 +1,26 @@
 package com.trubochisty.truboserver.model;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import lombok.Data;
+import org.hibernate.annotations.UuidGenerator;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
-public class User {
+@Data //testing
+//по-идее нужен отдельный entity class, но и так сойдет
+
+public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @UuidGenerator
     Long id;
 
     @Column(nullable = false, unique = true)
     String username;
-
-    @Column(nullable = false, unique = true)
-    String email;
 
     @Column(nullable = false)
     String password;
@@ -25,4 +30,50 @@ public class User {
 
     @Column(nullable = false)
     String updatedAt;
+
+    @Column(name = "phone_number")
+    String phoneNumber;
+
+    String email;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    String role;
+
+    // need to implement wisely. do we need exp
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+       return List.of(new SimpleGrantedAuthority(role));
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
 }

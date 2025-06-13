@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ import java.util.List;
 public class Culvert {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @UuidGenerator
     private Long id;
 
     // Identifying information
@@ -32,46 +33,42 @@ public class Culvert {
     @NotBlank(message = "Coordinates are required")
     private String coordinates;
 
-    @Column(nullable = false, length = 200)
-    @NotBlank(message = "Road is required")
+    @Column(nullable = true, length = 200)
     private String road;
 
-    @Column(name = "serial_number", unique = true, length = 100)
-    @NotBlank(message = "Serial number is required")
+    @Column(name = "serial_number", length = 100)
     private String serialNumber;
 
     // Technical parameters
-    @Column(name = "pipe_type", nullable = false, length = 100)
-    @NotBlank(message = "Pipe type is required")
+    @Column(name = "pipe_type", nullable = true, length = 100)
     private String pipeType;
 
-    @Column(nullable = false, length = 100)
-    @NotBlank(message = "Material is required")
     private String material;
 
-    @Column(nullable = false, length = 50)
-    @NotBlank(message = "Diameter is required")
+
     private String diameter;
 
-    @Column(nullable = false, length = 50)
-    @NotBlank(message = "Length is required")
     private String length;
 
-    @Column(name = "head_type", nullable = false, length = 100)
+    @Column(name = "head_type")
     @NotBlank(message = "Head type is required")
     private String headType;
 
-    @Column(name = "foundation_type", nullable = false, length = 100)
+    @Column(name = "foundation_type")
     @NotBlank(message = "Foundation type is required")
     private String foundationType;
 
-    @Column(name = "work_type", nullable = false, length = 100)
+    @Column(name = "work_type")
     @NotBlank(message = "Work type is required")
     private String workType;
 
     // Additional information
-    @Column(name = "construction_year", length = 4)
-    private String constructionYear;
+    @Column(name = "construction_date")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime constructionDate;
+    //спорно, localDateTime криво работает часто.
+    //во фронте тоже ебанина будет, потому-что у меня нормально не получилось фронтом передавать LocalDateTime а с обычным
+    //time они клешатся
 
     @Column(name = "last_repair_date")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
