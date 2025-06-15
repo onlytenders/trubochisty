@@ -34,22 +34,32 @@ class ActionButtons extends StatelessWidget {
       ),
       child: Column(
         children: [
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () => _handleSave(context),
-              icon: const Icon(Icons.save_rounded),
-              label: const Text('Сохранить данные'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+          Consumer<CulvertProvider>(
+            builder: (context, provider, _) {
+              return SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: provider.isLoading ? null : () => _handleSave(context),
+                  icon: provider.isLoading 
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.save_rounded),
+                  label: Text(provider.isLoading ? 'Сохранение...' : 'Сохранить данные'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 2,
+                  ),
                 ),
-                elevation: 2,
-              ),
-            ),
+              );
+            },
           ),
           const SizedBox(height: 12),
           SizedBox(
@@ -78,24 +88,128 @@ class ActionButtons extends StatelessWidget {
     );
   }
 
-  void _handleSave(BuildContext context) {
+  Future<void> _handleSave(BuildContext context) async {
+    // First, collect form data from parent component
     if (onSave != null) {
       onSave!();
     }
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.white),
-            const SizedBox(width: 8),
-            const Text('Данные успешно сохранены!'),
-          ],
+    // Validate required fields
+    if (!_validateCulvertData(context)) {
+      return;
+    }
+    
+    final provider = context.read<CulvertProvider>();
+    
+    try {
+      // Save to backend API
+      await provider.saveCulvertToBackend(data);
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 8),
+                const Text('Данные успешно сохранены в базу данных!'),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.error, color: Colors.white),
+                const SizedBox(width: 8),
+                Text('Ошибка сохранения: ${e.toString()}'),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
+  }
+
+  bool _validateCulvertData(BuildContext context) {
+    final errors = <String>[];
+    
+    // Check if fields are empty or only contain whitespace
+    if (data.address.trim().isEmpty) {
+      errors.add('Адрес');
+    }
+    if (data.coordinates.trim().isEmpty) {
+      errors.add('Координаты');
+    }
+    if (data.road.trim().isEmpty) {
+      errors.add('Дорога');
+    }
+    if (data.serialNumber.trim().isEmpty) {
+      errors.add('Серийный номер');
+    }
+    
+    // Validate numeric fields
+    if (data.diameter.trim().isEmpty) {
+      errors.add('Диаметр');
+    } else {
+      final diameter = double.tryParse(data.diameter);
+      if (diameter == null || diameter <= 0) {
+        errors.add('Диаметр (должно быть положительным числом)');
+      }
+    }
+    
+    if (data.length.trim().isEmpty) {
+      errors.add('Длина');
+    } else {
+      final length = double.tryParse(data.length);
+      if (length == null || length <= 0) {
+        errors.add('Длина (должно быть положительным числом)');
+      }
+    }
+    
+    if (data.constructionYear.trim().isEmpty) {
+      errors.add('Год постройки');
+    } else {
+      final year = int.tryParse(data.constructionYear);
+      if (year == null || year < 1900 || year > DateTime.now().year) {
+        errors.add('Год постройки (должно быть числом между 1900 и ${DateTime.now().year})');
+      }
+    }
+    
+    if (errors.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.warning, color: Colors.white),
+                  const SizedBox(width: 8),
+                  const Text('Заполните обязательные поля:'),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text('• ${errors.join('\n• ')}'),
+            ],
+          ),
+          backgroundColor: Colors.orange,
+          duration: const Duration(seconds: 4),
         ),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+      );
+      return false;
+    }
+    
+    return true;
   }
 
   void _showDeleteDialog(BuildContext context) {

@@ -1,144 +1,279 @@
 import 'package:flutter/foundation.dart';
+import '../models/culvert.dart';
 import '../models/culvert_data.dart';
+import '../services/api_service.dart';
 
-class CulvertProvider extends ChangeNotifier {
-  final List<CulvertData> _culverts = [];
+class CulvertProvider with ChangeNotifier {
+  final ApiService _apiService = ApiService();
+  List<Culvert> _culverts = [];
+  List<CulvertData> _culvertDataList = [];
   CulvertData? _selectedCulvert;
+  bool _isLoading = false;
+  String? _error;
   String _searchQuery = '';
-  
-  // Getters
-  List<CulvertData> get culverts => List.unmodifiable(_culverts);
+
+  List<Culvert> get culverts => _culverts;
+  List<CulvertData> get culvertDataList => _culvertDataList;
+  List<CulvertData> get filteredCulverts => _getFilteredCulverts();
   CulvertData? get selectedCulvert => _selectedCulvert;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
   String get searchQuery => _searchQuery;
-  
-  // Filtered culverts based on search
-  List<CulvertData> get filteredCulverts {
-    if (_searchQuery.isEmpty) return _culverts;
-    return _culverts.where((culvert) => culvert.matches(_searchQuery)).toList();
-  }
-  
-  // Initialize with sample data
-  CulvertProvider() {
-    _initializeSampleData();
-  }
-  
-  void _initializeSampleData() {
-    _culverts.addAll([
-      CulvertData(
-        address: 'ул. Ленина, 25',
-        coordinates: '55.7558° N, 37.6173° E',
-        road: 'М-1 "Беларусь"',
-        serialNumber: '001',
-        diameter: '1.5',
-        length: '12.0',
-        material: 'Бетон',
-        pipeType: 'Круглая',
-        strengthRating: 4.2,
-        safetyRating: 3.8,
-        maintainabilityRating: 4.0,
-        generalConditionRating: 4.0,
-      ),
-      CulvertData(
-        address: 'пр. Мира, 108',
-        coordinates: '55.7697° N, 37.6398° E',
-        road: 'А-108 МКАД',
-        serialNumber: '002',
-        diameter: '2.0',
-        length: '8.5',
-        material: 'Сталь',
-        pipeType: 'Прямоугольная',
-        strengthRating: 3.5,
-        safetyRating: 3.2,
-        maintainabilityRating: 3.0,
-        generalConditionRating: 3.2,
-      ),
-      CulvertData(
-        address: 'Кутузовский проспект, 45',
-        coordinates: '55.7414° N, 37.5332° E',
-        road: 'М-1 "Беларусь"',
-        serialNumber: '003',
-        diameter: '1.8',
-        length: '15.2',
-        material: 'Бетон',
-        pipeType: 'Круглая',
-        strengthRating: 4.5,
-        safetyRating: 4.1,
-        maintainabilityRating: 4.3,
-        generalConditionRating: 4.3,
-      ),
-      CulvertData(
-        address: 'Тверская ул., 12',
-        coordinates: '55.7558° N, 37.6176° E',
-        road: 'А-101',
-        serialNumber: '004',
-        diameter: '1.2',
-        length: '6.8',
-        material: 'Пластик',
-        pipeType: 'Круглая',
-        strengthRating: 4.8,
-        safetyRating: 4.6,
-        maintainabilityRating: 4.7,
-        generalConditionRating: 4.7,
-      ),
-    ]);
-    
-    // Select first culvert by default
-    if (_culverts.isNotEmpty) {
-      _selectedCulvert = _culverts.first;
+
+  // Get filtered culverts based on search query
+  List<CulvertData> _getFilteredCulverts() {
+    if (_searchQuery.isEmpty) {
+      return _culvertDataList;
     }
+    
+    final query = _searchQuery.toLowerCase();
+    return _culvertDataList.where((culvert) {
+      return culvert.address.toLowerCase().contains(query) ||
+             culvert.road.toLowerCase().contains(query) ||
+             culvert.serialNumber.toLowerCase().contains(query) ||
+             culvert.coordinates.toLowerCase().contains(query) ||
+             culvert.material.toLowerCase().contains(query) ||
+             culvert.pipeType.toLowerCase().contains(query);
+    }).toList();
   }
-  
-  // Methods
-  void selectCulvert(CulvertData culvert) {
-    _selectedCulvert = culvert;
-    notifyListeners();
-  }
-  
+
+  // Update search query and filter results
   void updateSearchQuery(String query) {
     _searchQuery = query;
     notifyListeners();
   }
-  
-  void addCulvert(CulvertData culvert) {
-    _culverts.add(culvert);
+
+  void selectCulvert(CulvertData culvert) {
+    _selectedCulvert = culvert;
     notifyListeners();
   }
-  
-  void updateCulvert(CulvertData updatedCulvert) {
-    final index = _culverts.indexWhere((c) => c == _selectedCulvert);
-    if (index != -1) {
-      _culverts[index] = updatedCulvert;
-      _selectedCulvert = updatedCulvert;
+
+  void clearSelection() {
+    _selectedCulvert = null;
+    notifyListeners();
+  }
+
+  Future<void> loadCulverts() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _culverts = await _apiService.getAllCulverts();
+      // Convert Culvert objects to CulvertData for UI
+      _culvertDataList = _culverts.map((culvert) => _convertCulvertToCulvertData(culvert)).toList();
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
       notifyListeners();
     }
   }
-  
-  void deleteCulvert(CulvertData culvert) {
-    _culverts.remove(culvert);
-    if (_selectedCulvert == culvert) {
-      _selectedCulvert = _culverts.isNotEmpty ? _culverts.first : null;
+
+  Future<void> createCulvert(Culvert culvert) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final newCulvert = await _apiService.createCulvert(culvert);
+      _culverts.add(newCulvert);
+      _culvertDataList.add(_convertCulvertToCulvertData(newCulvert));
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-    notifyListeners();
   }
-  
-  void createNewCulvert() {
-    // Create a unique new culvert with a temporary unique identifier
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final newCulvert = CulvertData(
-      serialNumber: 'NEW_${timestamp}',
-      address: '',
-      coordinates: '',
-      road: '',
-    );
-    _culverts.insert(0, newCulvert);
-    _selectedCulvert = newCulvert;
-    notifyListeners();
-  }
-  
-  // Method to save current culvert before creating new one
+
+  // Method for creating new culvert with default data
   void createNewCulvertWithSave() {
-    // Always save current state before creating new
-    // The form will handle the actual saving logic
-    createNewCulvert();
+    final newCulvertData = CulvertData();
+    selectCulvert(newCulvertData);
+  }
+
+  void updateCulvert(CulvertData updatedData) {
+    if (_selectedCulvert != null) {
+      _selectedCulvert = updatedData;
+      notifyListeners();
+    }
+  }
+
+  // NEW: Method to save culvert data to backend
+  Future<void> saveCulvertToBackend(CulvertData culvertData) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      // Convert CulvertData to Culvert for API
+      final culvert = _convertCulvertDataToCulvert(culvertData);
+      
+      // Check if this is a new culvert (no existing ID)
+      Culvert? existingCulvert;
+      try {
+        existingCulvert = _culverts.firstWhere((c) => c.serialNumber == culvertData.serialNumber);
+      } catch (e) {
+        existingCulvert = null;
+      }
+      
+      if (existingCulvert == null) {
+        // Create new culvert
+        final newCulvert = await _apiService.createCulvert(culvert);
+        _culverts.add(newCulvert);
+        _culvertDataList.add(_convertCulvertToCulvertData(newCulvert));
+        
+        // Update selected culvert with the new data (including ID)
+        if (_selectedCulvert?.serialNumber == culvertData.serialNumber) {
+          _selectedCulvert = _convertCulvertToCulvertData(newCulvert);
+        }
+      } else {
+        // Update existing culvert
+        final updatedCulvert = await _apiService.updateCulvert(existingCulvert!.id, culvert);
+        final index = _culverts.indexWhere((c) => c.id == existingCulvert!.id);
+        if (index != -1) {
+          _culverts[index] = updatedCulvert;
+          _culvertDataList[index] = _convertCulvertToCulvertData(updatedCulvert);
+        }
+        
+        // Update selected culvert
+        if (_selectedCulvert?.serialNumber == culvertData.serialNumber) {
+          _selectedCulvert = _convertCulvertToCulvertData(updatedCulvert);
+        }
+      }
+    } catch (e) {
+      _error = e.toString();
+      rethrow; // Re-throw so UI can handle the error
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateCulvertOnServer(String id, Culvert culvert) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final updatedCulvert = await _apiService.updateCulvert(id, culvert);
+      final index = _culverts.indexWhere((c) => c.id == id);
+      if (index != -1) {
+        _culverts[index] = updatedCulvert;
+        _culvertDataList[index] = _convertCulvertToCulvertData(updatedCulvert);
+      }
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Updated to accept CulvertData parameter
+  Future<void> deleteCulvert(CulvertData culvertData) async {
+    // For now, we can't delete culverts that don't have an ID (new ones)
+    if (culvertData.serialNumber.isEmpty) {
+      // Just remove from UI if it's a new culvert
+      if (_selectedCulvert == culvertData) {
+        clearSelection();
+      }
+      return;
+    }
+
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      // Find the actual culvert by serial number
+      final culvert = _culverts.firstWhere(
+        (c) => c.serialNumber == culvertData.serialNumber,
+        orElse: () => throw Exception('Culvert not found'),
+      );
+      
+      await _apiService.deleteCulvert(culvert.id);
+      _culverts.removeWhere((c) => c.id == culvert.id);
+      _culvertDataList.removeWhere((c) => c.serialNumber == culvertData.serialNumber);
+      
+      if (_selectedCulvert == culvertData) {
+        clearSelection();
+      }
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> searchCulverts(String query) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _culverts = await _apiService.searchCulverts(query);
+      _culvertDataList = _culverts.map((culvert) => _convertCulvertToCulvertData(culvert)).toList();
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Helper method to convert Culvert to CulvertData
+  CulvertData _convertCulvertToCulvertData(Culvert culvert) {
+    return CulvertData(
+      address: culvert.address,
+      coordinates: culvert.coordinates,
+      road: culvert.road,
+      serialNumber: culvert.serialNumber,
+      pipeType: culvert.pipeType,
+      material: culvert.material,
+      diameter: culvert.diameter.toString(),
+      length: culvert.length.toString(),
+      headType: culvert.headType,
+      foundationType: culvert.foundationType,
+      workType: culvert.workType,
+      constructionYear: culvert.constructionYear.toString(),
+      lastRepairDate: culvert.lastRepairDate,
+      lastInspectionDate: culvert.lastInspectionDate,
+      strengthRating: culvert.strengthRating,
+      safetyRating: culvert.safetyRating,
+      maintainabilityRating: culvert.maintainabilityRating,
+      generalConditionRating: culvert.generalConditionRating,
+      defects: culvert.defects,
+      photos: culvert.photos,
+    );
+  }
+
+  // Helper method to convert CulvertData to Culvert for API calls
+  Culvert _convertCulvertDataToCulvert(CulvertData culvertData) {
+    return Culvert(
+      id: '', // Backend will generate this
+      address: culvertData.address,
+      coordinates: culvertData.coordinates,
+      road: culvertData.road,
+      serialNumber: culvertData.serialNumber,
+      pipeType: culvertData.pipeType,
+      material: culvertData.material,
+      diameter: double.tryParse(culvertData.diameter) ?? 0.0,
+      length: double.tryParse(culvertData.length) ?? 0.0,
+      headType: culvertData.headType,
+      foundationType: culvertData.foundationType,
+      workType: culvertData.workType,
+      constructionYear: int.tryParse(culvertData.constructionYear) ?? DateTime.now().year,
+      lastRepairDate: culvertData.lastRepairDate,
+      lastInspectionDate: culvertData.lastInspectionDate,
+      strengthRating: culvertData.strengthRating,
+      safetyRating: culvertData.safetyRating,
+      maintainabilityRating: culvertData.maintainabilityRating,
+      generalConditionRating: culvertData.generalConditionRating,
+      defects: culvertData.defects,
+      photos: culvertData.photos,
+    );
   }
 } 
