@@ -22,7 +22,15 @@ public class Culvert {
     
     @Id
     @UuidGenerator
-    private Long id;
+    private String culvert_id;
+
+    /*@ManyToMany
+    @JoinTable(
+            name = "culvert_users",
+            joinColumns = @JoinColumn(name = "culvert_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> users = new ArrayList<>();*/
 
     // Identifying information
     @Column(nullable = false, length = 500)
@@ -44,7 +52,6 @@ public class Culvert {
     private String pipeType;
 
     private String material;
-
 
     private String diameter;
 
@@ -120,4 +127,6 @@ public class Culvert {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+
 }

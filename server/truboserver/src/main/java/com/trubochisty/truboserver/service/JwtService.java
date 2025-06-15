@@ -16,8 +16,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * сервис для jwt токенов, по хорошему его бы обновить, потому-что тут почти все depreciated
+ * гпт не умеет обновлять кстати:) почитаю попозже че там поменялось
+ *
+ * НО! работает
+ */
 @Service
 public class JwtService {
+    //его в yml запихнуть потом
     @Value("53B73E5F1C4E0A2D3B5F2D784E6A1B423D6F247D1F6E5C3A596D635A75327993")
     private String jwtSigningKey;
 
